@@ -1,0 +1,6 @@
+fastapi[standard]>=0.115.8
+sqlmodel
+psycopg2-binary
+pydantic_settings
+uvicorn>=0.34.0
+python-jose[cryptography]
