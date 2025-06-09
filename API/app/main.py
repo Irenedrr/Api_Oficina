@@ -1,3 +1,4 @@
+from app.autenticacion.auth_middleware import AuthMiddleware
 from fastapi import FastAPI
 from app.routes import usuarios, eventos, roles,mensajes
 from sqlmodel import SQLModel
@@ -13,6 +14,8 @@ app.include_router(usuarios.router)
 app.include_router(roles.router)
 app.include_router(mensajes.router)
 app.include_router(eventos.router)
+# Incluir el middleware de autenticación
+app.add_middleware(AuthMiddleware)
 
 # Crear tablas en la base de datos
 def init_db():

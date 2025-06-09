@@ -7,6 +7,7 @@ from sqlmodel import Session, select
 from app.db.session import get_session
 from app.services.usuario_service import UsuarioService
 from app.schemas.usuario import UsuarioCreate, UsuarioUpdate, UsuarioResponse
+from app.autenticacion.manejador_token import obtener_usuario_actual
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
@@ -35,6 +36,15 @@ def delete_usuario(id: int, service: UsuarioService = Depends()):
 def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
     usuario = session.exec(select(Usuario).where(Usuario.email == form_data.username)).first()
     if not usuario or usuario.contrasena != form_data.password:
+        raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
+    
+    token = crear_token({"sub": str(usuario.id)})
+    return {"access_token": token, "token_type": "bearer"}
+
+@router.post("/jwt_login")
+def jwt_login(usuario_data: UsuarioCreate, session: Session = Depends(get_session)):
+    usuario = session.exec(select(Usuario).where(Usuario.email == usuario_data.email)).first()
+    if not usuario or usuario.contrasena != usuario_data.contrasena:
         raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
     
     token = crear_token({"sub": str(usuario.id)})
