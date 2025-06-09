@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel
 from typing import Optional,List
 from app.schemas.evento import EventoResponse
+from pydantic import BaseModel
 
     
 class UsuarioCreate(SQLModel):
@@ -28,3 +29,9 @@ class UsuarioUpdate(SQLModel):
     personaje: Optional[str] = None
     oficina: Optional[str] = None
     estado: Optional[str] = None
+
+class UsuarioActivo(BaseModel):
+    usuario_id: int
+    nombre: str
+    personaje: str
+    oficina: str

@@ -1,20 +1,27 @@
 from fastapi import FastAPI
-from app.routes import usuarios, eventos, roles,mensajes
+from fastapi.middleware.cors import CORSMiddleware  # 👈 Importa CORS
+from app.routes import usuarios, eventos, roles, mensajes, sessiones
 from sqlmodel import SQLModel
 from app.db.session import engine
 
-# Importar las rutas de la oficina virtual
-from app.routes import usuarios, roles, mensajes, eventos
-
 app = FastAPI(title="Oficina Virtual API")
 
-# Incluir las rutas
+# 🟢 Habilitar CORS (¡esto es lo que permite llamadas desde Godot!)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # O reemplaza con ["http://localhost:8080"] para más seguridad
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Incluir routers correctamente
 app.include_router(usuarios.router)
 app.include_router(roles.router)
 app.include_router(mensajes.router)
 app.include_router(eventos.router)
+app.include_router(sessiones.router)
 
-# Crear tablas en la base de datos
 def init_db():
     SQLModel.metadata.create_all(engine)
 

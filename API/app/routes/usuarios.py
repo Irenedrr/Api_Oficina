@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends
-from app.models.usuario import Usuario 
-from fastapi import HTTPException  
+# app/routes/usuarios.py
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from app.autenticacion.seguridad_jwt import crear_token
 from sqlmodel import Session, select
-from app.db.session import get_session
-from app.services.usuario_service import UsuarioService
+from typing import Optional
+
+from app.models.usuario import Usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioUpdate, UsuarioResponse
+from app.services.usuario_service import UsuarioService
+from app.db.session import get_session
+from app.autenticacion.seguridad_jwt import crear_token
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
@@ -25,7 +27,6 @@ def read_usuario(id: int, service: UsuarioService = Depends()):
 @router.post("/actualizar/{id}", response_model=UsuarioResponse)
 def update_usuario_post(id: int, usuario_data: UsuarioUpdate, service: UsuarioService = Depends()):
     return service.update(id, usuario_data)
-
 
 @router.delete("/{id}", response_model=dict)
 def delete_usuario(id: int, service: UsuarioService = Depends()):
@@ -65,3 +66,8 @@ def obtener_config_juego(usuario_id: int, session: Session = Depends(get_session
         "avatar": usuario.personaje,
         "oficina": usuario.oficina
     }
+
+@router.get("/por_oficina/{nombre}", response_model=list[UsuarioResponse])
+def obtener_por_oficina(nombre: str, session: Session = Depends(get_session)):
+    usuarios = session.exec(select(Usuario).where(Usuario.oficina == nombre)).all()
+    return usuarios
